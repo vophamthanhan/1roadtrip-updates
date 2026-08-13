@@ -1276,7 +1276,10 @@ async function initializeStorage(isInstall) {
     migratedCredentials[proxyIdentity(migrated.proxy)] = legacyPassword;
   }
 
-  const validProfiles = normalizeStoredProfiles(proxyProfiles);
+  const validProfiles = mergeBundledProfiles(
+    normalizeStoredProfiles(proxyProfiles),
+    await loadBundledProfiles()
+  );
   if (!validProfiles.length && migrated.proxy.host) {
     validProfiles.push(toProfileRecord(migrated, {
       id: createProfileId(),
@@ -1568,7 +1571,8 @@ async function upsertAppliedProfile(profile, profileMeta, token) {
       id,
       name: profileMeta.profileName || existing?.name || `${profile.proxy.host}:${profile.proxy.port}`,
       createdAt: existing?.createdAt || Date.now(),
-      updatedAt: Date.now()
+      updatedAt: Date.now(),
+      bundled: existing?.bundled
     });
 
     if (existingIndex >= 0) profiles[existingIndex] = record;
@@ -1708,8 +1712,58 @@ function normalizeStoredProfiles(profiles) {
       id: profile.id,
       name: profile.name,
       createdAt: profile.createdAt,
-      updatedAt: profile.updatedAt
+      updatedAt: profile.updatedAt,
+      bundled: profile.bundled
     }));
+}
+
+async function loadBundledProfiles() {
+  try {
+    const url = chrome.runtime.getURL?.('profiles/bundled-profiles.json');
+    if (!url) return [];
+    const response = await fetch(url);
+    if (!response.ok) return [];
+    const payload = await response.json();
+    const items = Array.isArray(payload) ? payload : payload?.profiles;
+    return Array.isArray(items) ? items : [];
+  } catch {
+    return [];
+  }
+}
+
+function mergeBundledProfiles(existing, bundled) {
+  const next = [...existing];
+  for (const incoming of bundled) {
+    const record = bundledProfileRecord(incoming);
+    if (!record) continue;
+    const index = next.findIndex((profile) => profile.id === record.id);
+    if (index < 0) {
+      next.push(record);
+      continue;
+    }
+    next[index] = toProfileRecord(record, {
+      id: record.id,
+      name: record.name,
+      createdAt: next[index].createdAt,
+      updatedAt: Date.now(),
+      bundled: true
+    });
+  }
+  return next;
+}
+
+function bundledProfileRecord(input) {
+  const id = String(input?.id || '').trim();
+  if (!id || /[\s/]/.test(id)) return null;
+  const normalized = normalizeProfile({ ...input, proxy: { ...input?.proxy, password: '' } });
+  if (!normalized.proxy.host || !normalized.proxy.port) return null;
+  return toProfileRecord(normalized, {
+    id,
+    name: input?.name || `${normalized.proxy.host}:${normalized.proxy.port}`,
+    createdAt: Number(input?.createdAt || Date.now()),
+    updatedAt: Date.now(),
+    bundled: true
+  });
 }
 
 function toProfileRecord(profile, metadata = {}) {
@@ -1723,7 +1777,8 @@ function toProfileRecord(profile, metadata = {}) {
     privacyLockdown: stored.privacyLockdown,
     validationUrl: stored.validationUrl,
     createdAt: Number(metadata.createdAt || Date.now()),
-    updatedAt: Number(metadata.updatedAt || Date.now())
+    updatedAt: Number(metadata.updatedAt || Date.now()),
+    bundled: Boolean(metadata.bundled)
   };
 }
 

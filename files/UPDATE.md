@@ -125,6 +125,39 @@ Bản *Load unpacked* không dùng updater của Chrome. Trong sidebar có nút 
 
 Phát hành cho nút này: `npm run release` tạo `dist/pages-feed/` (`latest.json` + `files/`). Copy các file đó lên repo Pages cùng `updates.xml` và `.crx`.
 
+## Profile cố định trong git
+
+Proxy Profile Manager đọc `profiles/bundled-profiles.json` mỗi lần extension load. File này đi cùng zip / nút Update.
+
+- `id` phải **ổn định** (ví dụ `git-nyc-1`). Đổi host/UA trong file này rồi phát hành, máy khác Reload sẽ thấy thay đổi.
+- **Không** ghi password vào JSON. User nhập password một lần trên máy; Chrome giữ local.
+- Profile tạo trên UI (không có id trong file) không bị xóa khi git cập nhật.
+- Profile `GIT` trong dropdown là profile đến từ file này.
+
+Mẫu:
+
+```json
+{
+  "profiles": [
+    {
+      "id": "git-nyc-1",
+      "name": "US New York",
+      "proxy": {
+        "scheme": "http",
+        "host": "proxy.example.com",
+        "port": 8000,
+        "username": "user49183"
+      },
+      "userAgent": "",
+      "validationUrl": "",
+      "fingerprint": { "enabled": false, "locale": "en-US", "timezone": "America/New_York", "platform": "Windows" }
+    }
+  ]
+}
+```
+
+Để trống `userAgent` thì lần Apply user bấm **Use current** hoặc chọn US User-Agent. Export JSON hiện tại (không có password) cũng có thể dán vào file này nếu thêm `id` cố định.
+
 ## Bảo mật khóa ký
 
 - `updates/extension.pem` và `updates/config.json` đã được gitignore.

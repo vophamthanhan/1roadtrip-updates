@@ -3,7 +3,7 @@ const els = {
   homeView: $('homeView'), proxyView: $('proxyView'), homeBtn: $('homeBtn'), backHomeBtn: $('backHomeBtn'),
   openProxyHeroBtn: $('openProxyHeroBtn'), moduleSearch: $('moduleSearch'), moduleGrid: $('moduleGrid'),
   homeProxyState: $('homeProxyState'), homeStatusTitle: $('homeStatusTitle'), homeStatusCopy: $('homeStatusCopy'),
-  compactBtn: $('compactBtn'), appVersion: $('appVersion'), updateBtn: $('updateBtn'),
+  compactBtn: $('compactBtn'), appVersion: $('appVersion'), updateBtn: $('updateBtn'), updateMessage: $('updateMessage'),
   scheme: $('scheme'), port: $('port'), host: $('host'), username: $('username'), password: $('password'),
   userAgent: $('userAgent'), uaPreset: $('uaPreset'), uaPresetHint: $('uaPresetHint'),
   validationUrl: $('validationUrl'), applyBtn: $('applyBtn'), lockBtn: $('lockBtn'), retryBtn: $('retryBtn'), nativeUaBtn: $('nativeUaBtn'),
@@ -581,9 +581,10 @@ function renderProfileManager() {
   dashboard.profiles.forEach((profile) => {
     const option = document.createElement('option');
     option.value = profile.id;
-    option.textContent = profile.id === dashboard.activeProfileId
-      ? `${profile.name} • ACTIVE`
-      : profile.name;
+    const marks = [];
+    if (profile.bundled) marks.push('GIT');
+    if (profile.id === dashboard.activeProfileId) marks.push('ACTIVE');
+    option.textContent = marks.length ? `${profile.name} • ${marks.join(' · ')}` : profile.name;
     els.profileSelect.append(option);
   });
   els.profileSelect.value = currentProfileId || '';
@@ -603,6 +604,10 @@ function renderHealth(health = {}) {
 }
 
 function renderUpdateNotice(message) {
+  if (els.updateMessage) {
+    els.updateMessage.hidden = !message;
+    els.updateMessage.textContent = message || '';
+  }
   if (els.statusMessage) els.statusMessage.textContent = message;
   if (els.homeStatusCopy) els.homeStatusCopy.textContent = message;
 }
@@ -620,7 +625,12 @@ function installedVersion() {
 
 function bindUpdateButton() {
   if (!els.updateBtn) return;
-  els.updateBtn.addEventListener('click', applyUnpackedUpdate);
+  els.updateBtn.addEventListener('click', openUnpackedUpdatePage);
+}
+
+function openUnpackedUpdatePage() {
+  const url = chrome.runtime.getURL('update.html');
+  window.open(url, '1roadtrip-update');
 }
 
 async function refreshRemoteUpdateState() {
@@ -638,30 +648,9 @@ async function refreshRemoteUpdateState() {
       els.updateBtn.classList.remove('available');
       els.updateBtn.title = `Đang là bản ${installedVersion() || latest.version}. Bấm để kiểm tra và đồng bộ lại từ GitHub.`;
     }
-  } catch {
-    els.updateBtn.title = 'Không kiểm tra được GitHub. Vẫn có thể bấm Update để thử lại.';
-  }
-}
-
-async function applyUnpackedUpdate() {
-  if (!els.updateBtn || !globalThis.UpdateClient) return;
-  const previousLabel = els.updateBtn.textContent;
-  els.updateBtn.disabled = true;
-  els.updateBtn.textContent = 'Updating…';
-  try {
-    const latest = await globalThis.UpdateClient.applyLatestToDirectory((progress) => {
-      els.updateBtn.textContent = `Updating ${progress.completed}/${progress.total}`;
-    });
-    els.updateBtn.textContent = `Updated v${latest.version}`;
-    els.updateBtn.classList.remove('available');
-    renderUpdateNotice(`Đã ghi bản ${latest.version} vào thư mục extension. Mở chrome://extensions và bấm Reload.`);
   } catch (error) {
-    els.updateBtn.textContent = previousLabel;
-    if (error?.name === 'AbortError') return;
-    renderUpdateNotice(error instanceof Error ? error.message : String(error));
-  } finally {
-    els.updateBtn.disabled = false;
-    refreshRemoteUpdateState();
+    els.updateBtn.title = 'Không kiểm tra được GitHub. Bấm Update để mở trang cập nhật và xem lỗi.';
+    renderUpdateNotice(error instanceof Error ? error.message : 'Không đọc được GitHub. Reload extension bản 0.7.1 rồi thử lại.');
   }
 }
 

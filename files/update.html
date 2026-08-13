@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>1Roadtrip Update</title>
+  <link rel="stylesheet" href="sidepanel.css" />
+  <style>
+    .update-shell { max-width: 520px; margin: 0 auto; padding: 22px 16px 40px; display: grid; gap: 14px; }
+    .update-card { padding: 16px; display: grid; gap: 10px; }
+    .update-card p { font-size: 12px; line-height: 1.45; color: var(--muted); }
+    .update-card ol { margin: 0; padding-left: 18px; color: var(--muted); font-size: 12px; line-height: 1.5; }
+    #updateStatus { min-height: 1.4em; }
+    #applyUpdateBtn { width: 100%; }
+  </style>
+</head>
+<body>
+  <main class="update-shell">
+    <header class="topbar">
+      <div class="brand-copy">
+        <p class="eyebrow">1ROADTRIP</p>
+        <div class="brand-title-row">
+          <h1>Update</h1>
+          <span id="appVersion" class="version-badge"></span>
+        </div>
+      </div>
+    </header>
+
+    <section class="glass update-card">
+      <p id="versionLine">Đang kiểm tra GitHub…</p>
+      <p id="updateStatus" class="status-message"></p>
+      <button id="applyUpdateBtn" class="primary-btn" type="button"><span>Chọn thư mục và cập nhật</span><b>→</b></button>
+      <ol>
+        <li>Chọn đúng thư mục đã <b>Load unpacked</b> (bên trong phải có file <code>manifest.json</code>).</li>
+        <li>Không chọn file zip, không chọn thư mục cha.</li>
+        <li>Xong thì mở <code>chrome://extensions</code> và bấm <b>Reload</b>.</li>
+      </ol>
+    </section>
+  </main>
+  <script src="update-feed.js"></script>
+  <script src="update-client.js"></script>
+  <script>
+    const versionEl = document.getElementById('appVersion');
+    const versionLine = document.getElementById('versionLine');
+    const statusEl = document.getElementById('updateStatus');
+    const applyBtn = document.getElementById('applyUpdateBtn');
+    const localVersion = chrome.runtime.getManifest?.()?.version || '';
+    versionEl.textContent = localVersion ? `v${localVersion}` : '';
+
+    function setStatus(text) {
+      statusEl.textContent = text;
+    }
+
+    async function refresh() {
+      try {
+        const latest = await UpdateClient.fetchLatest();
+        const newer = UpdateClient.compareVersions(latest.version, localVersion) > 0;
+        versionLine.textContent = newer
+          ? `Máy này: v${localVersion || '?'} · GitHub: v${latest.version}`
+          : `Máy này đã là v${localVersion}. Vẫn có thể đồng bộ lại file từ GitHub.`;
+        applyBtn.querySelector('span').textContent = newer
+          ? `Cập nhật lên v${latest.version}`
+          : 'Đồng bộ lại từ GitHub';
+      } catch (error) {
+        versionLine.textContent = 'Không đọc được GitHub Pages.';
+        setStatus(error instanceof Error ? error.message : String(error));
+      }
+    }
+
+    applyBtn.addEventListener('click', async () => {
+      applyBtn.disabled = true;
+      applyBtn.querySelector('span').textContent = 'Đang tải…';
+      try {
+        const latest = await UpdateClient.applyLatestToDirectory((progress) => {
+          applyBtn.querySelector('span').textContent = `Đang ghi ${progress.completed}/${progress.total}`;
+        });
+        setStatus(`Đã ghi bản ${latest.version} vào thư mục đã chọn. Mở chrome://extensions và bấm Reload.`);
+      } catch (error) {
+        if (error?.name === 'AbortError') setStatus('Bạn đã hủy chọn thư mục.');
+        else setStatus(error instanceof Error ? error.message : String(error));
+      } finally {
+        applyBtn.disabled = false;
+        refresh();
+      }
+    });
+
+    refresh();
+  </script>
+</body>
+</html>

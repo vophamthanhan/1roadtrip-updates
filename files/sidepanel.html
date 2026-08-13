@@ -17,6 +17,7 @@
           <span id="appVersion" class="version-badge" aria-label="Extension version"></span>
           <button id="updateBtn" class="update-btn" type="button" title="Tải bản mới từ GitHub và ghi vào thư mục Load unpacked">Update</button>
         </div>
+        <p id="updateMessage" class="update-message" hidden></p>
       </div>
       <button class="notification-btn" title="System notifications" aria-label="System notifications">●</button>
       <button id="compactBtn" class="compact-btn" title="Thu nhỏ sidebar" aria-label="Thu nhỏ sidebar" aria-expanded="true">−</button>
@@ -130,7 +131,7 @@
           <button id="importProfilesBtn" class="secondary-btn">Import lines</button>
           <button id="exportProfilesBtn" class="secondary-btn">Export without passwords</button>
         </div>
-        <p id="profileMessage" class="fineprint">Existing profiles are only changed after Apply succeeds.</p>
+        <p id="profileMessage" class="fineprint">Existing profiles are only changed after Apply succeeds. Profiles with a GIT mark come from profiles/bundled-profiles.json in the repo; passwords stay on this Chrome only.</p>
       </details>
     </section>
 

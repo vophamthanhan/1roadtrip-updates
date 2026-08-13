@@ -71,6 +71,7 @@ button { color: inherit; }
 }
 .update-btn.available { background: var(--mint); color: #143b2e; }
 .update-btn:disabled { opacity: .55; cursor: wait; }
+.update-message { margin-top: 4px; font-size: 9.5px; line-height: 1.35; color: var(--danger); }
 h1,h2,h3,p { margin: 0; }
 h1 { font-size: 20px; letter-spacing: -.04em; }
 h2 { font-size: 18px; letter-spacing: -.035em; }
