@@ -142,31 +142,17 @@
     await writable.close();
   }
 
-  async function chooseExtensionDirectory() {
+  function pickDirectoryNow() {
     if (typeof globalScope.showDirectoryPicker !== 'function') {
-      throw new Error('This Chrome build cannot choose a folder. Update Chrome and try again.');
+      throw new Error('Chrome không mở được hộp chọn thư mục. Hãy Reload extension bản mới, hoặc giải nén zip thủ công.');
     }
-    return globalScope.showDirectoryPicker({
-      id: '1roadtrip-unpacked',
-      mode: 'readwrite'
-    });
+    return globalScope.showDirectoryPicker({ mode: 'readwrite' });
   }
 
-  async function resolveExtensionDirectory() {
-    const stored = await readStoredDirectoryHandle();
-    if (stored && await ensureWritePermission(stored)) {
-      await verifyExtensionDirectory(stored);
-      return stored;
-    }
-    const picked = await chooseExtensionDirectory();
-    await verifyExtensionDirectory(picked);
-    await storeDirectoryHandle(picked);
-    return picked;
-  }
-
-  async function applyLatestToDirectory(onProgress) {
+  async function applyLatestToDirectory(root, onProgress) {
+    if (!root) throw new Error('Chưa chọn thư mục extension.');
+    await verifyExtensionDirectory(root);
     const latest = await fetchLatest();
-    const root = await resolveExtensionDirectory();
     let completed = 0;
     for (const relativePath of latest.files) {
       const bytes = await fetchFileBytes(relativePath);
@@ -182,6 +168,7 @@
     assertSafeRelativePath,
     fetchWithTimeout,
     fetchLatest,
+    pickDirectoryNow,
     applyLatestToDirectory
   });
   globalScope.UpdateClient = api;

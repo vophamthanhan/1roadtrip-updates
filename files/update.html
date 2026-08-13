@@ -72,19 +72,27 @@
     }
 
     applyBtn.addEventListener('click', async () => {
+      let root;
+      try {
+        root = await UpdateClient.pickDirectoryNow();
+      } catch (error) {
+        if (error?.name === 'AbortError') setStatus('Bạn đã hủy chọn thư mục.');
+        else setStatus(error instanceof Error ? error.message : String(error));
+        return;
+      }
+
       applyBtn.disabled = true;
       applyBtn.querySelector('span').textContent = 'Đang tải…';
       try {
-        const latest = await UpdateClient.applyLatestToDirectory((progress) => {
+        const latest = await UpdateClient.applyLatestToDirectory(root, (progress) => {
           applyBtn.querySelector('span').textContent = `Đang ghi ${progress.completed}/${progress.total}`;
         });
         setStatus(`Đã ghi bản ${latest.version} vào thư mục đã chọn. Mở chrome://extensions và bấm Reload.`);
       } catch (error) {
-        if (error?.name === 'AbortError') setStatus('Bạn đã hủy chọn thư mục.');
-        else setStatus(error instanceof Error ? error.message : String(error));
+        setStatus(error instanceof Error ? error.message : String(error));
       } finally {
         applyBtn.disabled = false;
-        refresh();
+        applyBtn.querySelector('span').textContent = 'Chọn thư mục và cập nhật';
       }
     });
 
