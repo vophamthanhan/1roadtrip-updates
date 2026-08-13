@@ -639,6 +639,10 @@ function isClosedDeepTargetError(error) {
   return /No (?:tab|target) with given id|Target closed|Detached while handling command/i.test(formatError(error));
 }
 
+function isLocaleOverrideConflict(error) {
+  return /Another locale override is already in effect/i.test(formatError(error));
+}
+
 async function applyFingerprintToTab(tabId, profile, token = null) {
   const previous = deepTabQueue.get(tabId) || Promise.resolve();
   const task = previous.catch(() => {}).then(async () => {
@@ -688,9 +692,13 @@ async function configureDeepTarget(target, profile, targetType = 'page') {
   await chrome.debugger.sendCommand(target, 'Emulation.setTimezoneOverride', {
     timezoneId: fingerprint.timezone
   });
-  await chrome.debugger.sendCommand(target, 'Emulation.setLocaleOverride', {
-    locale: fingerprint.locale.replace('-', '_')
-  });
+  try {
+    await chrome.debugger.sendCommand(target, 'Emulation.setLocaleOverride', {
+      locale: fingerprint.locale.replace('-', '_')
+    });
+  } catch (error) {
+    if (!isLocaleOverrideConflict(error)) throw error;
+  }
   await chrome.debugger.sendCommand(target, 'Emulation.setHardwareConcurrencyOverride', {
     hardwareConcurrency: fingerprint.hardwareConcurrency
   });
