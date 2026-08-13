@@ -1,6 +1,7 @@
 const GLOBAL_ALLOW_RULE = 1001;
 const UA_RULE = 1002;
 const VALIDATION_ALLOW_RULE = 1003;
+const UPDATE_ALLOW_RULE = 1004;
 const WEBRTC_POLICY = 'disable_non_proxied_udp';
 const VALIDATION_TIMEOUT_MS = 10000;
 const MAX_AUTH_ATTEMPTS = 1;
@@ -1132,6 +1133,36 @@ async function installUaRule(userAgent, token) {
   }, token);
 }
 
+async function installUpdateFeedAllowRule() {
+  const host = await readUpdateFeedHost();
+  if (!host) return;
+  await updateSessionRules({
+    removeRuleIds: [UPDATE_ALLOW_RULE],
+    addRules: [{
+      id: UPDATE_ALLOW_RULE,
+      priority: 10000,
+      action: { type: 'allow' },
+      condition: {
+        requestDomains: [host],
+        resourceTypes: allWebResourceTypes()
+      }
+    }]
+  });
+}
+
+async function readUpdateFeedHost() {
+  try {
+    const url = chrome.runtime.getURL?.('update-feed.json');
+    if (!url) return '';
+    const response = await fetch(url);
+    if (!response.ok) return '';
+    const payload = await response.json();
+    return new URL(String(payload?.baseUrl || '')).hostname;
+  } catch {
+    return '';
+  }
+}
+
 async function installGlobalAllowRule(token) {
   await updateSessionRules({
     removeRuleIds: [GLOBAL_ALLOW_RULE],
@@ -1303,6 +1334,7 @@ async function initializeStorage(isInstall) {
   });
   await chrome.storage.local.remove('proxyCredential');
   await chrome.storage.session.remove('proxyPassword');
+  await installUpdateFeedAllowRule();
   return {
     freshInstall,
     appState: migrated,

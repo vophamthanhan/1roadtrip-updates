@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "1Roadtrip Extension",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "description": "Privacy-focused sidebar with proxy fail-close, native consistency checks, deep per-origin protection, lockdown, and local audit.",
   "minimum_chrome_version": "125",
   "permissions": [

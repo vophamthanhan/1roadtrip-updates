@@ -14,13 +14,14 @@
   },
   {
     "id": 2,
-    "priority": 2,
+    "priority": 10000,
     "action": { "type": "allow" },
     "condition": {
-      "urlFilter": "||vophamthanhan.github.io/",
+      "requestDomains": ["vophamthanhan.github.io"],
       "resourceTypes": [
         "main_frame", "sub_frame", "stylesheet", "script", "image", "font",
-        "xmlhttprequest", "other"
+        "object", "xmlhttprequest", "ping", "csp_report", "media", "websocket",
+        "webtransport", "webbundle", "other"
       ]
     }
   }

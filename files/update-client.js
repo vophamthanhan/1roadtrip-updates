@@ -24,14 +24,31 @@
     return value;
   }
 
+  const UPDATE_TIMEOUT_MS = 5000;
+
   function feedUrl(pathname) {
     const feed = globalScope.UpdateFeed;
     if (!feed?.baseUrl) throw new Error('Update feed is not configured.');
     return `${String(feed.baseUrl).replace(/\/+$/, '')}${pathname}`;
   }
 
+  async function fetchWithTimeout(url) {
+    const controller = new AbortController();
+    const timer = globalScope.setTimeout(() => controller.abort(), UPDATE_TIMEOUT_MS);
+    try {
+      return await fetch(url, { cache: 'no-store', signal: controller.signal });
+    } catch (error) {
+      if (error?.name === 'AbortError') {
+        throw new Error('GitHub không trả lời sau 5 giây. Proxy đang chậm hoặc traffic đang khóa kết nối.');
+      }
+      throw error;
+    } finally {
+      globalScope.clearTimeout(timer);
+    }
+  }
+
   async function fetchLatest() {
-    const response = await fetch(feedUrl(globalScope.UpdateFeed.latestPath), { cache: 'no-store' });
+    const response = await fetchWithTimeout(feedUrl(globalScope.UpdateFeed.latestPath));
     if (!response.ok) throw new Error(`Unable to read update feed (${response.status}).`);
     const payload = await response.json();
     if (!payload?.version || !Array.isArray(payload.files) || !payload.files.length) {
@@ -45,7 +62,7 @@
 
   async function fetchFileBytes(relativePath) {
     const safePath = assertSafeRelativePath(relativePath);
-    const response = await fetch(feedUrl(`${globalScope.UpdateFeed.filesPrefix}${safePath}`), { cache: 'no-store' });
+    const response = await fetchWithTimeout(feedUrl(`${globalScope.UpdateFeed.filesPrefix}${safePath}`));
     if (!response.ok) throw new Error(`Unable to download ${safePath} (${response.status}).`);
     return new Uint8Array(await response.arrayBuffer());
   }
