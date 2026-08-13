@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>1Roadtrip Extension</title>
+  <link rel="stylesheet" href="sidepanel.css" />
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <button id="homeBtn" class="brandmark" title="1Roadtrip home">1R</button>
+      <div class="brand-copy">
+        <p class="eyebrow">DEPARTMENT WORKSPACE</p>
+        <div class="brand-title-row">
+          <h1>1Roadtrip</h1>
+          <span id="appVersion" class="version-badge" aria-label="Extension version"></span>
+          <button id="updateBtn" class="update-btn" type="button" title="Tải bản mới từ GitHub và ghi vào thư mục Load unpacked">Update</button>
+        </div>
+      </div>
+      <button class="notification-btn" title="System notifications" aria-label="System notifications">●</button>
+      <button id="compactBtn" class="compact-btn" title="Thu nhỏ sidebar" aria-label="Thu nhỏ sidebar" aria-expanded="true">−</button>
+    </header>
+
+    <section id="homeView" class="app-view home-view">
+      <div class="search-shell">
+        <span>⌕</span>
+        <input id="moduleSearch" type="search" placeholder="Search department tools..." autocomplete="off" />
+      </div>
+
+      <section class="welcome-card">
+        <p class="eyebrow light">1ROADTRIP OPERATIONS</p>
+        <h2>One workspace.<br />Safer browser profiles.</h2>
+        <p>Manage connection profiles, audit privacy consistency and access department tools from one sidebar.</p>
+        <button id="openProxyHeroBtn" class="welcome-action">Open Proxy Guard <span>→</span></button>
+        <div class="route-art" aria-hidden="true"><i></i><i></i><i></i></div>
+      </section>
+
+      <div class="home-section-heading">
+        <div><p class="eyebrow light">WORKSPACE</p><h2>Department tools</h2></div>
+        <span id="moduleCount">4 modules</span>
+      </div>
+
+      <section class="module-grid" id="moduleGrid">
+        <button class="module-card module-card-wide" data-module="proxy" data-search="proxy guard connection browser profile">
+          <span class="module-icon proxy-icon">↗</span>
+          <span><b>Proxy Guard</b><small>Connection & fingerprint profiles</small></span>
+          <em id="homeProxyState">LOCKED</em>
+        </button>
+        <button class="module-card" data-module="audit" data-search="privacy fingerprint local audit">
+          <span class="module-icon">◎</span>
+          <span><b>Privacy Audit</b><small>Local consistency report</small></span>
+        </button>
+        <button class="module-card coming-soon" data-search="department resources coming soon">
+          <span class="module-icon">▦</span>
+          <span><b>Department Hub</b><small>Coming soon</small></span>
+        </button>
+        <button class="module-card coming-soon" data-search="workflow automation coming soon">
+          <span class="module-icon">⌁</span>
+          <span><b>Workflows</b><small>Coming soon</small></span>
+        </button>
+      </section>
+
+      <section class="activity-card">
+        <div class="activity-map"><span></span><i></i></div>
+        <div><p class="eyebrow light">LIVE STATUS</p><h3 id="homeStatusTitle">Traffic protected</h3><p id="homeStatusCopy">Open Proxy Guard to review the active route.</p></div>
+      </section>
+    </section>
+
+    <section id="proxyView" class="app-view proxy-view" hidden>
+      <div class="module-toolbar">
+        <button id="backHomeBtn" class="back-btn">←</button>
+        <div><p class="eyebrow light">1ROADTRIP MODULE</p><h2>Proxy Guard</h2></div>
+        <span id="statusDot" class="status-dot"></span>
+      </div>
+
+    <section class="hero-card glass">
+      <div class="hero-row">
+        <div>
+          <p class="label">PROFILE STATUS</p>
+          <div class="status-line"><span id="statusText">Locked</span></div>
+        </div>
+        <span id="statusPill" class="pill">LOCKED</span>
+      </div>
+      <div class="ip-row">
+        <div>
+          <p class="muted">Proxy route</p>
+          <strong id="proxyRoute">—</strong>
+        </div>
+        <div class="hero-actions">
+          <button id="retryBtn" class="text-btn" title="Retry the current form values">Retry</button>
+          <button id="lockBtn" class="icon-btn" title="Lock now">⏻</button>
+        </div>
+      </div>
+      <p id="statusMessage" class="status-message">Web traffic stays blocked until the profile is applied locally.</p>
+      <p id="healthMessage" class="health-message">Proxy health: waiting for an active profile.</p>
+    </section>
+
+    <section class="glass form-card profile-manager">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">PROFILES</p>
+          <h2>Proxy Profile Manager</h2>
+        </div>
+        <span id="profileCount" class="mini-badge neutral">0 saved</span>
+      </div>
+
+      <label>
+        <span>Saved profile</span>
+        <select id="profileSelect">
+          <option value="">New unsaved profile</option>
+        </select>
+      </label>
+
+      <label>
+        <span>Profile name</span>
+        <input id="profileName" maxlength="80" placeholder="My proxy profile" autocomplete="off" />
+      </label>
+
+      <div class="profile-actions">
+        <button id="newProfileBtn" class="secondary-btn">New</button>
+        <button id="duplicateProfileBtn" class="secondary-btn">Duplicate</button>
+        <button id="deleteProfileBtn" class="secondary-btn danger-text">Delete</button>
+      </div>
+
+      <details class="bulk-tools">
+        <summary>Bulk import / export</summary>
+        <textarea id="importText" rows="4" placeholder="Proxy lines or previously exported JSON"></textarea>
+        <div class="profile-actions">
+          <button id="importProfilesBtn" class="secondary-btn">Import lines</button>
+          <button id="exportProfilesBtn" class="secondary-btn">Export without passwords</button>
+        </div>
+        <p id="profileMessage" class="fineprint">Existing profiles are only changed after Apply succeeds.</p>
+      </details>
+    </section>
+
+    <section class="glass form-card">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">CONNECTION</p>
+          <h2>Proxy</h2>
+        </div>
+        <span class="mini-badge">Required</span>
+      </div>
+
+      <div class="field-grid two">
+        <label>
+          <span>Protocol</span>
+          <select id="scheme">
+            <option value="http">HTTP</option>
+            <option value="https">HTTPS</option>
+            <option value="socks5">SOCKS5</option>
+            <option value="socks4">SOCKS4</option>
+          </select>
+        </label>
+        <label>
+          <span>Port</span>
+          <input id="port" type="number" min="1" max="65535" step="1" inputmode="numeric" placeholder="8000" />
+        </label>
+      </div>
+
+      <label>
+        <span>Proxy host / IP</span>
+        <input id="host" placeholder="proxy.example.com or host:port:user:password" autocomplete="off" spellcheck="false" />
+      </label>
+      <p class="fineprint">Tip: paste <code>host:port:username:password</code> here to fill all proxy fields automatically.</p>
+
+      <div class="field-grid two">
+        <label>
+          <span>Username</span>
+          <input id="username" placeholder="Optional" autocomplete="off" />
+        </label>
+        <label>
+          <span>Password</span>
+          <input id="password" type="password" placeholder="Optional" autocomplete="new-password" />
+        </label>
+      </div>
+    </section>
+
+    <section class="glass form-card">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">REQUEST PROFILE</p>
+          <h2>User-Agent</h2>
+        </div>
+        <button id="nativeUaBtn" class="text-btn">Use current</button>
+      </div>
+      <label>
+        <span>US User-Agent list</span>
+        <select id="uaPreset"></select>
+      </label>
+      <label>
+        <span>Custom request User-Agent</span>
+        <textarea id="userAgent" rows="4" placeholder="Mozilla/5.0 ..."></textarea>
+      </label>
+      <p id="uaPresetHint" class="fineprint">Without Deep mode this changes only the request header. Deep mode also synchronizes JavaScript and Client Hints.</p>
+    </section>
+
+    <section class="glass form-card">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">FINGERPRINT CONSISTENCY</p>
+          <h2>Deep mode</h2>
+        </div>
+        <button id="nativeFingerprintBtn" class="text-btn">Use current</button>
+      </div>
+
+      <label class="toggle-row">
+        <span><b>Enable per-tab CDP protection</b><small>Chrome shows a debugger warning while protected tabs are attached.</small></span>
+        <input id="deepMode" type="checkbox" />
+      </label>
+
+      <div id="deepFields" class="deep-fields" hidden>
+        <label>
+          <span>Ready-made US profile</span>
+          <select id="usBundlePreset"></select>
+        </label>
+        <p id="usBundleHint" class="fineprint">Pick a US city + device to fill locale, timezone, screen, and a matching User-Agent.</p>
+        <div id="usPresetSummary" class="preset-summary" hidden></div>
+
+        <label>
+          <span>US location</span>
+          <select id="usLocationPreset"></select>
+        </label>
+
+        <div class="field-grid two">
+          <label>
+            <span>Locale</span>
+            <select id="localePreset"></select>
+          </label>
+          <label>
+            <span>IANA timezone</span>
+            <select id="timezonePreset"></select>
+          </label>
+        </div>
+        <div class="field-grid two" id="localeTimezoneCustom" hidden>
+          <label>
+            <span>Custom locale</span>
+            <input id="locale" placeholder="en-US" autocomplete="off" spellcheck="false" />
+          </label>
+          <label>
+            <span>Custom timezone</span>
+            <input id="timezone" placeholder="America/New_York" autocomplete="off" spellcheck="false" />
+          </label>
+        </div>
+
+        <div class="field-grid two">
+          <label>
+            <span>Platform</span>
+            <select id="platform">
+              <option value="Windows">Windows</option>
+              <option value="macOS">macOS</option>
+              <option value="Linux">Linux</option>
+            </select>
+          </label>
+          <label>
+            <span>CPU threads</span>
+            <input id="hardwareConcurrency" type="number" min="1" max="64" step="1" />
+          </label>
+        </div>
+
+        <div class="field-grid two">
+          <label>
+            <span>Device memory</span>
+            <select id="deviceMemory">
+              <option value="1">1 GB</option>
+              <option value="2">2 GB</option>
+              <option value="4">4 GB</option>
+              <option value="8">8 GB</option>
+            </select>
+          </label>
+          <label>
+            <span>Color depth</span>
+            <select id="colorDepth">
+              <option value="16">16 bit</option>
+              <option value="24">24 bit</option>
+              <option value="30">30 bit</option>
+              <option value="32">32 bit</option>
+            </select>
+          </label>
+        </div>
+
+        <label>
+          <span>US device profile</span>
+          <select id="devicePreset"></select>
+        </label>
+        <label>
+          <span>US screen size</span>
+          <select id="screenPreset"></select>
+        </label>
+
+        <div class="field-grid two">
+          <label>
+            <span>Screen width</span>
+            <input id="screenWidth" type="number" min="320" max="7680" step="1" />
+          </label>
+          <label>
+            <span>Screen height</span>
+            <input id="screenHeight" type="number" min="240" max="4320" step="1" />
+          </label>
+        </div>
+
+        <label>
+          <span>Device scale factor</span>
+          <input id="deviceScaleFactor" type="number" min="0.5" max="4" step="0.25" />
+        </label>
+
+        <details class="bulk-tools advanced-fingerprint">
+          <summary>Advanced device signals</summary>
+          <div class="field-grid two">
+            <label><span>Touch points</span><input id="maxTouchPoints" type="number" min="0" max="10" step="1" /></label>
+            <label><span>Color gamut</span><select id="colorGamut"><option value="srgb">sRGB</option><option value="p3">Display P3</option></select></label>
+          </div>
+          <div class="field-grid two">
+            <label><span>Color scheme</span><select id="colorScheme"><option value="light">Light</option><option value="dark">Dark</option></select></label>
+            <label class="compact-toggle"><span>Reduced motion</span><input id="reducedMotion" type="checkbox" /></label>
+          </div>
+          <label class="compact-toggle"><span>Disable WebGPU exposure</span><input id="blockWebGpu" type="checkbox" /></label>
+          <label class="toggle-row">
+            <span><b>Optional geolocation profile</b><small>Manual values only; no IP lookup service is contacted.</small></span>
+            <input id="geolocationEnabled" type="checkbox" />
+          </label>
+          <div id="geolocationFields" hidden>
+            <label>
+              <span>US city coordinates</span>
+              <select id="geoPreset"></select>
+            </label>
+            <div class="field-grid two">
+              <label><span>Latitude</span><input id="latitude" type="number" min="-90" max="90" step="0.000001" /></label>
+              <label><span>Longitude</span><input id="longitude" type="number" min="-180" max="180" step="0.000001" /></label>
+              <label><span>Accuracy (m)</span><input id="locationAccuracy" type="number" min="1" max="100000" step="1" /></label>
+            </div>
+          </div>
+        </details>
+
+        <div class="shield-grid">
+          <label><input id="protectCanvas" type="checkbox" /> Canvas</label>
+          <label><input id="protectWebGl" type="checkbox" /> WebGL</label>
+          <label><input id="protectAudio" type="checkbox" /> Audio</label>
+          <label><input id="protectFonts" type="checkbox" /> Fonts</label>
+        </div>
+      </div>
+      <p id="deepMessage" class="fineprint">Deep mode is disabled for this profile.</p>
+    </section>
+
+    <section class="glass form-card">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">LOCAL PRIVACY</p>
+          <h2>Privacy Lockdown</h2>
+        </div>
+        <button id="auditBtn" class="text-btn">Run audit</button>
+      </div>
+      <label class="toggle-row">
+        <span><b>Enable network privacy lockdown</b><small>Uses the existing Privacy permission; no new permission is requested.</small></span>
+        <input id="lockdownEnabled" type="checkbox" />
+      </label>
+      <div class="shield-grid">
+        <label><input id="disableNetworkPrediction" type="checkbox" /> DNS prefetch</label>
+        <label><input id="disableTopics" type="checkbox" /> Topics API</label>
+        <label><input id="blockThirdPartyCookies" type="checkbox" /> Third-party cookies</label>
+      </div>
+      <p id="lockdownMessage" class="fineprint">Privacy Lockdown is disabled for this profile.</p>
+    </section>
+
+    <section class="glass form-card">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">OPTIONAL</p>
+          <h2>Connectivity check</h2>
+        </div>
+        <span class="mini-badge neutral">User controlled</span>
+      </div>
+      <label>
+        <span>Your validation URL</span>
+        <input id="validationUrl" type="url" placeholder="Your HTTPS health-check URL" autocomplete="off" spellcheck="false" />
+      </label>
+      <p class="fineprint">Leave blank for local confirmation only. When provided, only this URL is contacted, redirects are rejected, and no credentials are included.</p>
+    </section>
+
+    <button id="applyBtn" class="primary-btn"><span>Apply & Save Profile</span><b>→</b></button>
+
+    <section class="glass checklist">
+      <div class="check-row"><span>1</span><p><b>Locked by default</b><small>HTTP(S) / WebSocket traffic blocked until the profile is applied.</small></p></div>
+      <div class="check-row"><span>2</span><p><b>No direct bypass</b><small>All supported destinations use the configured fixed proxy.</small></p></div>
+      <div class="check-row"><span>3</span><p><b>WebRTC protected</b><small>Non-proxied UDP is disabled while the extension is enabled.</small></p></div>
+      <div class="check-row"><span>4</span><p><b>No built-in third party</b><small>No external validation service is contacted unless you provide its URL.</small></p></div>
+      <div class="check-row"><span>5</span><p><b>Deep mode is explicit</b><small>Only enabled profiles attach Chrome Debugger to supported web tabs.</small></p></div>
+      <div class="check-row"><span>6</span><p><b>Local audit</b><small>Fingerprint checks run locally and are never sent to a built-in service.</small></p></div>
+    </section>
+    </section>
+  </main>
+  <script src="proxy-parser.js"></script>
+  <script src="us-presets.js"></script>
+  <script src="update-feed.js"></script>
+  <script src="update-client.js"></script>
+  <script src="sidepanel.js"></script>
+</body>
+</html>
