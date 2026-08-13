@@ -1,0 +1,9 @@
+Windows Registry Editor Version 5.00
+
+; Install 1Roadtrip for the current Windows user only. No Administrator required. Quit Chrome completely after import.
+
+[HKEY_CURRENT_USER\SOFTWARE\Policies\Google\Chrome\ExtensionInstallForcelist]
+"1"="odpmlkhhljpgfhfnkjmnakhdljhbjoak;https://vophamthanhan.github.io/1roadtrip-updates/updates.xml"
+
+[HKEY_CURRENT_USER\SOFTWARE\Policies\Google\Chrome\ExtensionInstallSources]
+"1"="https://vophamthanhan.github.io/*"

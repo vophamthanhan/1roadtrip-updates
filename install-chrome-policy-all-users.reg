@@ -1,0 +1,16 @@
+Windows Registry Editor Version 5.00
+
+; Install 1Roadtrip for every Windows user on this PC. Run as Administrator, then quit Chrome completely.
+; Extension ID: odpmlkhhljpgfhfnkjmnakhdljhbjoak
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Google\Chrome\ExtensionInstallForcelist]
+"1"="odpmlkhhljpgfhfnkjmnakhdljhbjoak;https://vophamthanhan.github.io/1roadtrip-updates/updates.xml"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Google\Chrome\ExtensionInstallSources]
+"1"="https://vophamthanhan.github.io/*"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Policies\Google\Chrome\ExtensionInstallForcelist]
+"1"="odpmlkhhljpgfhfnkjmnakhdljhbjoak;https://vophamthanhan.github.io/1roadtrip-updates/updates.xml"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Policies\Google\Chrome\ExtensionInstallSources]
+"1"="https://vophamthanhan.github.io/*"
