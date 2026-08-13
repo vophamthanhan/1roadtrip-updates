@@ -34,13 +34,21 @@
 
   async function fetchWithTimeout(url) {
     const controller = new AbortController();
-    const timer = globalScope.setTimeout(() => controller.abort(), UPDATE_TIMEOUT_MS);
+    const timeoutError = new Error('GitHub không trả lời sau 5 giây. Traffic đang LOCKED hoặc proxy không ra được GitHub.');
+    let timer = 0;
+    const timeout = new Promise((_, reject) => {
+      timer = globalScope.setTimeout(() => {
+        try { controller.abort(); } catch {}
+        reject(timeoutError);
+      }, UPDATE_TIMEOUT_MS);
+    });
     try {
-      return await fetch(url, { cache: 'no-store', signal: controller.signal });
+      return await Promise.race([
+        fetch(url, { cache: 'no-store', signal: controller.signal }),
+        timeout
+      ]);
     } catch (error) {
-      if (error?.name === 'AbortError') {
-        throw new Error('GitHub không trả lời sau 5 giây. Proxy đang chậm hoặc traffic đang khóa kết nối.');
-      }
+      if (error === timeoutError || error?.name === 'AbortError') throw timeoutError;
       throw error;
     } finally {
       globalScope.clearTimeout(timer);
@@ -172,6 +180,7 @@
   const api = Object.freeze({
     compareVersions,
     assertSafeRelativePath,
+    fetchWithTimeout,
     fetchLatest,
     applyLatestToDirectory
   });

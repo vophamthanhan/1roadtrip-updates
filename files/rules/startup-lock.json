@@ -5,6 +5,7 @@
     "action": { "type": "block" },
     "condition": {
       "regexFilter": "^(https?|wss?)://",
+      "excludedRequestDomains": ["vophamthanhan.github.io"],
       "resourceTypes": [
         "main_frame", "sub_frame", "stylesheet", "script", "image", "font",
         "object", "xmlhttprequest", "ping", "csp_report", "media", "websocket",

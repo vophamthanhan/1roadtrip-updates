@@ -27,7 +27,7 @@
     </header>
 
     <section class="glass update-card">
-      <p id="versionLine">Đang kiểm tra GitHub (tối đa 5 giây)…</p>
+      <p id="versionLine">Máy này sẵn sàng cập nhật. Đang hỏi GitHub…</p>
       <p id="updateStatus" class="status-message"></p>
       <button id="applyUpdateBtn" class="primary-btn" type="button"><span>Chọn thư mục và cập nhật</span><b>→</b></button>
       <ol>
@@ -46,6 +46,7 @@
     const applyBtn = document.getElementById('applyUpdateBtn');
     const localVersion = chrome.runtime.getManifest?.()?.version || '';
     versionEl.textContent = localVersion ? `v${localVersion}` : '';
+    versionLine.textContent = `Máy này: v${localVersion || '?'}. Đang hỏi GitHub…`;
 
     function setStatus(text) {
       statusEl.textContent = text;
@@ -53,7 +54,10 @@
 
     async function refresh() {
       try {
-        const latest = await UpdateClient.fetchLatest();
+        const latest = await Promise.race([
+          UpdateClient.fetchLatest(),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('GitHub không trả lời sau 5 giây.')), 5000))
+        ]);
         const newer = UpdateClient.compareVersions(latest.version, localVersion) > 0;
         versionLine.textContent = newer
           ? `Máy này: v${localVersion || '?'} · GitHub: v${latest.version}`
